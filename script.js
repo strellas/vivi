@@ -1,39 +1,50 @@
 const video = document.getElementById('verticalVideo');
 const playBtn = document.getElementById('playPause');
+const soundBtn = document.getElementById('soundToggle');
 
-(function(){
-  var isIOS = /iP(ad|hone|od)/.test(navigator.platform) || (navigator.userAgent.indexOf('Mac') !== -1 && 'ontouchend' in document);
-  if (isIOS && video) video.setAttribute('playsinline', '');
-})();
-
-function updatePlayButton(paused){
+function setPlayingState(isPlaying){
   if (!playBtn) return;
-  playBtn.setAttribute('aria-pressed', String(!paused));
-  playBtn.setAttribute('aria-label', paused ? 'Reproducir vídeo' : 'Pausar vídeo');
+  playBtn.setAttribute('aria-pressed', String(isPlaying));
+  playBtn.setAttribute('aria-label', isPlaying ? 'Pausar vídeo' : 'Reproducir vídeo');
 }
-
+function setMutedState(isMuted){
+  if (!soundBtn) return;
+  soundBtn.setAttribute('aria-pressed', String(isMuted));
+  soundBtn.setAttribute('aria-label', isMuted ? 'Activar sonido' : 'Silenciar');
+}
 function togglePlay(){
   if (!video) return;
   if (video.paused){
-    const playPromise = video.play();
-    if (playPromise !== undefined) playPromise.catch(()=>{});
+    const p = video.play();
+    if (p) p.catch(()=>{});
   } else {
     video.pause();
   }
-  updatePlayButton(video.paused);
+  setPlayingState(!video.paused);
 }
-
+function toggleMute(){
+  if (!video) return;
+  video.muted = !video.muted;
+  setMutedState(video.muted);
+}
 if (playBtn) playBtn.addEventListener('click', togglePlay);
-if (video) video.addEventListener('click', togglePlay);
-
+if (soundBtn) soundBtn.addEventListener('click', toggleMute);
 if (video){
-  video.addEventListener('play', ()=>updatePlayButton(false));
-  video.addEventListener('pause', ()=>updatePlayButton(true));
+  video.addEventListener('play', ()=>setPlayingState(true));
+  video.addEventListener('pause', ()=>setPlayingState(false));
+  video.addEventListener('volumechange', ()=>setMutedState(video.muted));
+  video.addEventListener('click', togglePlay);
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    video.pause();
+    setPlayingState(false);
+  }
+  setPlayingState(!video.paused);
+  setMutedState(video.muted);
   if ('IntersectionObserver' in window){
     const io = new IntersectionObserver(entries=>{
       entries.forEach(entry=>{
         if (entry.isIntersecting){
-          if (video.paused){
+          if (video.paused && video.muted) {
             const p = video.play();
             if (p) p.catch(()=>{});
           }
@@ -44,9 +55,4 @@ if (video){
     },{threshold:0.5});
     io.observe(video);
   }
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    video.pause();
-    updatePlayButton(true);
-  }
-  updatePlayButton(video.paused);
 }
