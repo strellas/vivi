@@ -12,11 +12,14 @@
 
     <aside class="video-wrap" aria-label="Vídeo vertical destacado">
       <div class="video-frame">
-        <video id="verticalVideo" muted loop preload="metadata" poster="image/videoframe_132119.png">
-          <source src="vid/Vivir Sin Ti.mp4" type="video/mp4" />
+        <video id="verticalVideo" loop preload="metadata" poster="image/videoframe_132119.png">
+          <source src="vid/Vivir%20Sin%20Ti.mp4" type="video/mp4" />
           Su navegador no soporta vídeo HTML5...
         </video>
-        <button id="playPause" type="button" class="play-btn" aria-label="Pausar vídeo" aria-pressed="true"></button>
+        <div class="controls" aria-hidden="false">
+          <button id="playPause" type="button" class="play-btn" aria-label="Reproducir vídeo" aria-pressed="false"></button>
+          <button id="soundToggle" type="button" class="sound-btn" aria-label="Activar sonido" aria-pressed="false"></button>
+        </div>
       </div>
     </aside>
   </main>
